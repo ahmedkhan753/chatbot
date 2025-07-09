@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #4f2ab4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        .message {
+            margin-bottom: 15px;
+        }
+        .user {
+            text-align: right;
+        }
+        .user .bubble {
+            background-color: #007bff;
+            color: white;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 15px 15px 0 15px;
+        }
+        .bot .bubble {
+            background-color: #e9e9eb;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 15px 15px 15px 0;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chat with AI 🤖</h2>
+
+        <div class="chat-box">
+            {% if user_message %}
+                <div class="message user">
+                    <div class="bubble">{{ user_message }}</div>
+                </div>
+                <div class="message bot">
+                    <div class="bubble">{{ bot_reply }}</div>
+                </div>
+            {% else %}
+                <p style="text-align:center; color: gray;">Start chatting!</p>
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            <input type="text" name="message" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>
