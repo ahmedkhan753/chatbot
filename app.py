@@ -1,12 +1,16 @@
 from flask import Flask, render_template, request, redirect , url_for , flash , session
 import sqlite3
 from werkzeug.security import generate_password_hash , check_password_hash
+import google.generativeai as genai
+import os
+
+# Initialize app
 app = Flask(__name__)
 app.secret_key = '0000'
-import google.generativeai as genai
-genai.configure(api_key="AIzaSyCviYMhPq10IHqxKmBUQxrPZuff7Ki-9LU")
-model = genai.GenerativeModel("gemini-2.0-flash")
 
+# Gemini setup
+genai.configure(api_key=os.environ.get("AIzaSyCviYMhPq10IHqxKmBUQxrPZuff7Ki-9LU"))  # safer!
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 # Initialize the database
 def init_db():
@@ -38,14 +42,13 @@ def register():
             flash('Registration successful! You can now log in.')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            flash(' Username already exists. Please choose another.')
-            return redirect(url_for('register'))  # Back to same page
+            flash('Username already exists. Please choose another.')
+            return redirect(url_for('register'))
         finally:
             conn.close()
     return render_template('register.html')
 
-# Login route (Login form)
-
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -68,12 +71,12 @@ def login():
                 flash('Incorrect password.')
                 return redirect(url_for('login'))
         else:
-            flash(' User not found.')
+            flash('User not found.')
             return redirect(url_for('login'))
 
     return render_template('login.html')
 
-# Chat with Gemini
+# Chat route
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
     if 'username' not in session:
@@ -93,7 +96,9 @@ def chat():
 
     return render_template('chat.html', user_message=user_message, bot_reply=bot_reply)
 
-if __name__== '__main__':
+# Run the app (Render will call this automatically using gunicorn)
+if __name__ == '__main__':
     print("Starting Flask app...")
     init_db()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
