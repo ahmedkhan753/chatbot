@@ -1,18 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
-import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import google.generativeai as genai
 
-# Setup Flask app
 app = Flask(__name__)
-app.secret_key = '0000' 
+app.secret_key = '0000'
 
-# Configure Gemini with environment variable
-genai.configure(api_key=os.environ["AIzaSyCviYMhPq10IHqxKmBUQxrPZuff7Ki-9LU"])
+# Configure Gemini API
+genai.configure(api_key="AIzaSyCviYMhPq10IHqxKmBUQxrPZuff7Ki-9LU")
 model = genai.GenerativeModel("gemini-2.0-flash")
 
-# Initialize the SQLite database
+# Initialize the database
 def init_db():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -42,11 +40,10 @@ def register():
             flash('Registration successful! You can now log in.')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            flash('Username already exists.')
+            flash('Username already exists. Please choose another.')
             return redirect(url_for('register'))
         finally:
             conn.close()
-
     return render_template('register.html')
 
 # Login route
@@ -65,11 +62,11 @@ def login():
         if result:
             stored_hash = result[0]
             if check_password_hash(stored_hash, password):
-                session['username'] = username
                 flash('Login successful!')
+                session['username'] = username
                 return redirect(url_for('chat'))
             else:
-                flash(' Incorrect password.')
+                flash('Incorrect password.')
                 return redirect(url_for('login'))
         else:
             flash('User not found.')
@@ -77,7 +74,7 @@ def login():
 
     return render_template('login.html')
 
-# Chatbot route
+# Chat route
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
     if 'username' not in session:
@@ -93,11 +90,12 @@ def chat():
             response = model.generate_content(user_message)
             bot_reply = response.text
         except Exception as e:
-            bot_reply = " Error talking to Gemini: " + str(e)
+            bot_reply = "Error talking to Gemini: " + str(e)
 
     return render_template('chat.html', user_message=user_message, bot_reply=bot_reply)
 
-# Only run on Replit or locally
+# Run the app
 if __name__ == '__main__':
+    print("Starting Flask app...")
     init_db()
-    app.run(host='0.0.0.0', port=3000, debug=True)
+    app.run(debug=True)
